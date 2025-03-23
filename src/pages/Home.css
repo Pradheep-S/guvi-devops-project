@@ -1,0 +1,80 @@
+body{
+  overflow-x: hidden;
+}
+.carousel .legend {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    font-size: 1.2rem;
+  }
+  
+  .home-content {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .home-content h2 {
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+    color: #333;
+  }
+  
+  .home-content p {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: #555;
+  }
+  
+  .home .carousel-inner img {
+    max-height: 400px; /* Adjust the height as needed */
+    object-fit: contain; /* Ensures the entire image is visible without cropping */
+    width: 100%; /* Ensure the image scales properly */
+  }
+  
+  .home .carousel {
+    margin-bottom: 30px; /* Add some space below the carousel */
+  }
+  
+  .card {
+    margin-top: 20px; /* Add some space above the text content section */
+  }
+/* Home.css */
+
+
+
+.carousel {
+  margin-bottom: 50px;
+}
+
+.footer {
+  background-color: #333;
+  color: white;
+  padding: 40px 0;
+}
+
+.footer h5 {
+  color: #ff5a5f;
+}
+
+.footer ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.footer ul li {
+  margin-bottom: 10px;
+}
+
+.footer ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+.footer ul li a:hover {
+  color: #ff5a5f;
+}
+
+.footer-bottom {
+  background-color: #222;
+  color: #ccc;
+  padding: 10px 0;
+}
