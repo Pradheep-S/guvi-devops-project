@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: bata-shoes
-          image: <your-dockerhub-username>/bata-shoes:latest
+          image: pradheep255/bata-shoes:latest
           ports:
             - containerPort: 80
 ---
