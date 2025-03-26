@@ -1,70 +1,165 @@
-# Getting Started with Create React App
+# Bata Shoes - DevOps Project
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 📌 Overview
+This project demonstrates a full DevOps pipeline for deploying a **React-based frontend application** using **Docker, Jenkins, and Kubernetes (Minikube)**. The project follows **CI/CD best practices** to automate the build, test, and deployment process.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📁 Project Structure
+```
+├── Dockerfile               # Dockerfile to containerize the React app
+├── k8s-deployment.yaml      # Kubernetes Deployment & Service definition
+├── Jenkinsfile              # CI/CD Pipeline script for Jenkins
+├── src/                     # React application source code
+├── public/                  # Public assets for the frontend
+└── README.md                # This file
+```
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 Technologies Used
+- **React** - Frontend framework
+- **Docker** - Containerization tool
+- **DockerHub** - Image repository
+- **Jenkins** - CI/CD automation server
+- **Kubernetes** (Minikube) - Container orchestration tool
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🛠 Setup & Deployment Process
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 🔹 1. Clone the Repository
+```sh
+git clone https://github.com/Pradheep-S/guvi-devops-project.git
+cd guvi-devops-project
+```
 
-### `npm run build`
+### 🔹 2. Containerizing the Application with Docker
+**Dockerfile:**
+```dockerfile
+# Build Stage
+FROM node:18 AS build
+WORKDIR /app
+COPY package.json .
+RUN npm install
+COPY . .
+RUN npm run build
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# Production Stage
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+#### **Build and Push the Docker Image**
+```sh
+docker build -t pradheep255/bata-shoes:latest .
+docker login -u pradheep255
+docker push pradheep255/bata-shoes:latest
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 🔹 3. Deploying with Kubernetes
+**k8s-deployment.yaml:**
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bata-shoes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bata-shoes
+  template:
+    metadata:
+      labels:
+        app: bata-shoes
+    spec:
+      containers:
+      - name: bata-shoes
+        image: pradheep255/bata-shoes:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bata-shoes-service
+spec:
+  type: NodePort
+  selector:
+    app: bata-shoes
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30007
+```
+#### **Apply Kubernetes Deployment**
+```sh
+kubectl apply -f k8s-deployment.yaml
+kubectl get pods -A
+kubectl get svc
+```
+#### **Access Application**
+```sh
+http://192.168.49.2:30007/
+```
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 🔹 4. Automating with Jenkins CI/CD
+#### **Jenkinsfile:**
+```groovy
+pipeline {
+    agent any
+    environment {
+        DOCKERHUB_USER = 'pradheep255'
+        IMAGE_NAME = 'bata-shoes'
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Pradheep-S/guvi-devops-project.git'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t $DOCKERHUB_USER/$IMAGE_NAME:latest .'
+                }
+            }
+        }
+        stage('Push to DockerHub') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: 'docker-seccred', url: '']) {
+                        sh 'docker push $DOCKERHUB_USER/$IMAGE_NAME:latest'
+                    }
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f k8s-deployment.yaml'
+            }
+        }
+    }
+}
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+#### **Fix Kubernetes Access in Jenkins**
+```sh
+mkdir -p /var/lib/jenkins/.kube
+sudo cp -i $HOME/.kube/config /var/lib/jenkins/.kube/
+sudo chown -R jenkins:jenkins /var/lib/jenkins/.kube
+sudo systemctl restart jenkins
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🎯 Conclusion
+This project successfully implements a **CI/CD pipeline** to automate **containerization and deployment** of a React application using **Docker, Jenkins, and Kubernetes**.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
